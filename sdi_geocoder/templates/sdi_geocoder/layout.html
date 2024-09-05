@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>{% block title %}{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'sdi_geocoder/site.css' %}"/>
+</head>
+
+<body>
+<div class="navbar">
+    <a href="{% url 'home' %}" class="navbar-brand">Geocoder</a>
+    <a href="{% url 'oaf-collection-list' %}" class="navbar-item">Verfügbare Objektarten</a>
+    <a href="{% url 'csv-list' %}" class="navbar-item">Meine CSV-Dateien</a>
+    <a href="{% url 'geocoding-list' %}" class="navbar-item">Meine Geocodings</a>
+    {% if user.is_superuser %}
+    <a href="{% url 'oaf-list' %}" class="navbar-item">OGC API Features</a>
+    {% endif %}
+    <a href="{% url 'about' %}" class="navbar-item">Hilfe</a>
+    <a href="{% url 'contact' %}" class="navbar-item">Kontakt</a>
+    {% if user.is_authenticated %}
+        <p>
+            Angemeldeter Benutzer: {{ user.username }} <br>
+            <a href="{% url 'logout' %}" class="navbar-item">Abmelden</a>
+        </p>
+    {% else %}
+        <a href="{% url 'login' %}" class="navbar-item">Anmelden</a>
+    {% endif %}
+</div>
+
+<div class="body-content">
+    {% block content %}
+    {% endblock %}
+    <hr/>
+    <footer>
+        <p>&copy; 2024</p>
+    </footer>
+</div>
+</body>
+</html>

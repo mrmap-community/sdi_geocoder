@@ -1,0 +1,33 @@
+{% extends "sdi_geocoder/layout.html" %}
+{% block title %}
+    OGC API Features Collections
+{% endblock %}
+{% block content %}
+<h3>OGC API Features collections</h3>
+{% if ogcapifeaturescollection_list %}
+    <table class="ogcapifeaturescollection">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Erstellt</th>
+            <th>Letzte Änderung</th>
+            <th>Titel</th>
+            <th>Name</th>
+            <th>CSV-Beispiel</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for oaf_collection in ogcapifeaturescollection_list %}
+            <tr>
+                <td>{{ oaf_collection.id }}</td>
+                <td>{{ oaf_collection.created }}</td>
+                <td>{{ oaf_collection.changed }}</td>
+                <td>{{ oaf_collection.title }}</td>
+                <td>{{ oaf_collection.name }}</td>
+                <td><a target="_blank" href="{% url 'oaf-collection-example-csv' pk=oaf_collection.id %}">Export Template</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "sdi_geocoder/layout.html" %}
+{% block title %}
+    Geocoding Ergebnis
+{% endblock %}
+{% block content %}
+<h3>Geocoding Ergebnis</h3>
+{% if geocodingresult_list %}
+    <table class="geocodingresult">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Erstellt</th>
+            <th>Letzte Änderung</th>
+            <th>Zeilennummer</th>
+            <th>Ergebnis</th>
+            <th>Geometrie</th>
+            <th>GET-Url</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for geocodingresult in geocodingresult_list %}
+            <tr>
+                <td>{{ geocodingresult.id }}</td>
+                <td>{{ geocodingresult.created }}</td>
+                <td>{{ geocodingresult.changed }}</td>
+                <td>{{ geocodingresult.line_number }}</td>
+                <td>{{ geocodingresult.result }}</td>
+                <td>{{ geocodingresult.geometry_object }}</td>
+                <td><a target="_blank" href="{{ geocodingresult.get_url }}">{{ geocodingresult.get_url }}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}

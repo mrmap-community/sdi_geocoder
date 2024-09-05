@@ -1,0 +1,40 @@
+{% extends "sdi_geocoder/layout.html" %}
+{% block title %}
+    Geocodings
+{% endblock %}
+{% block content %}
+<h3>Geocodings</h3>
+<p><a href="{% url 'geocoding-create'%}">Neues Geocoding</a></p>
+{% if geocoding_list %}
+    <table class="geocoding">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Erstellt</th>
+            <th>Letzte Änderung</th>
+            <th>Name</th>
+            <th>Identifizierte Geometrien</th>
+            <th>Ergebnisse (HTML)</th>
+            <th>Ergebnisse (CSV)</th>
+            <!--<th></th>-->
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for geocoding in geocoding_list %}
+            <tr>
+                <td>{{ geocoding.id }}</td>
+                <td>{{ geocoding.created }}</td>
+                <td>{{ geocoding.changed }}</td>
+                <td>{{ geocoding.title }}</td>
+                <td><a href="{% url 'geocoding-geometries' pk=geocoding.id %}">{{ geocoding.number_of_features }}</a></td>
+                <td><a href="{% url 'geocodingresult-list' pk=geocoding.id %}">Liste</a></td>
+                <td><a href="{% url 'geocodingresult-list-csv' pk=geocoding.id %}">Download</a></td>
+                <!--<td><a href="{% url 'geocoding-update' pk=geocoding.id %}">Bearbeiten</a></td>-->
+                <td><a href="{% url 'geocoding-delete' pk=geocoding.id %}">Löschen</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}

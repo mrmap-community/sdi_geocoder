@@ -1,0 +1,38 @@
+{% extends "sdi_geocoder/layout.html" %}
+{% block title %}
+    Rohe CSV-Dateien
+{% endblock %}
+{% block content %}
+<h3>Meine CSV-Dateien</h3>
+<p><a href="{% url 'csv-create'%}">CSV-Datei hochladen</a></p>
+{% if rawcsv_list %}
+    <table class="rawcsv_list">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Erstellt</th>
+            <th>Letzte Änderung</th>
+            <th>Name</th>
+            <th>Beschreibung</th>
+            <th>Dokument</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for csv in rawcsv_list %}
+            <tr>
+                <td>{{ csv.id }}</td>
+                <td>{{ csv.created }}</td>
+                <td>{{ csv.changed }}</td>
+                <td>{{ csv.name }}</td>
+                <td>{{ csv.description }}</td>
+                <td>{{ csv.attachment }}</td>
+                <td><a href="{% url 'csv-update' pk=csv.id %}">Bearbeiten</a></td>
+                <td><a href="{% url 'csv-delete' pk=csv.id %}">Löschen</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}

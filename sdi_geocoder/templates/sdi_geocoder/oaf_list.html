@@ -1,0 +1,36 @@
+{% extends "sdi_geocoder/layout.html" %}
+{% block title %}
+    OGC API Features Interfaces
+{% endblock %}
+{% block content %}
+<h3>OGC API Features Schnittstellen</h3>
+<p><a href="{% url 'oaf-create'%}">OAF registrieren</a></p>
+{% if ogcapifeatures_list %}
+    <table class="ogcapifeatures">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Erstellt</th>
+            <th>Letzte Änderung</th>
+            <th>Name</th>
+            <th>URL</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for oaf in ogcapifeatures_list %}
+            <tr>
+                <td>{{ oaf.id }}</td>
+                <td>{{ oaf.created }}</td>
+                <td>{{ oaf.changed }}</td>
+                <td>{{ oaf.title }}</td>
+                <td>{{ oaf.base_uri }}</td>
+                <td><a href="{% url 'oaf-update' pk=oaf.id %}">Bearbeiten</a></td>
+                <td><a href="{% url 'oaf-delete' pk=oaf.id %}">Löschen</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}

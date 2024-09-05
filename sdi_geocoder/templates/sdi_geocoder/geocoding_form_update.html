@@ -1,0 +1,16 @@
+{% extends "sdi_geocoder/layout.html" %}
+{% load bootstrap4 %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+{% block title %}
+    Geocoding
+{% endblock %}
+{% block content %}
+    <form action="" method="POST" class="geocoding-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.media }}
+        {% bootstrap_form form %}
+        
+        <input type="submit" class="save btn btn-default"value="Geocoding aktualisieren">
+    </form>
+{% endblock %}
