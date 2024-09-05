@@ -19,7 +19,7 @@ Einfache Django-Anwendung zum automatischen Geokodieren von CSV-Dateien. Die Kod
  Einfach unter Debian 11 ausprobieren ;-) 
 
  ```console
-git clone https://github.com/mrmap/sdi_geocoder.git
+git clone https://github.com/mrmap-community/sdi_geocoder.git
 cd sdi_geocoder
 python3 -m venv .venv
 source .venv/bin/activate
