@@ -14,9 +14,13 @@ Einfache Django-Anwendung zum automatischen Geokodieren von CSV-Dateien. Die Kod
 * Dokumentation des Prozesses in Form von CSV-Dateien
 * ...
 
+## Demo
+
+https://www.geoportal.rlp.de/geocoder
+
 ## Installation
  
- Einfach unter Debian 11 ausprobieren ;-) 
+ Einfach unter Debian 11 ausprobieren ;-) - Wichtig: BaseUrl ist {protocol}://{servername}:{port}/geocoder/ der Servername alleine reicht nicht!
 
  ```console
 git clone https://github.com/mrmap-community/sdi_geocoder.git
