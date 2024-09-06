@@ -46,7 +46,7 @@ class MapbenderAuthMiddleware:
                     #    user = AnonymousUser
                     #    request.user = user
                     # try to find special mapbender user in database - if not create one and set random password
-                    password = uuid.uuid4()
+                    password = str(uuid.uuid4())
                     user_list = User.objects.filter(username="mapbender_user_" + data['result']['value'])
                     if user_list:
                         user = user_list[0]
