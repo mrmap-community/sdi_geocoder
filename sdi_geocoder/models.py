@@ -2,6 +2,7 @@ from django.db import models
 import os, uuid
 from django.utils.text import slugify
 from django.contrib.auth.models import User
+from django.urls import reverse
 import magic
 
 def data_scheme():
@@ -86,6 +87,9 @@ class GeoCoding(GenericMetadata):
         """Returns a string representation of the object"""
         return f"{ self.title }"
     
+    def get_absolute_url(self):
+        return reverse('geocoding-geometries', kwargs={"pk": str(self.id)})
+
     @property
     def number_of_features(self):
         if self.feature_collection:

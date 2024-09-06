@@ -130,3 +130,14 @@ STATIC_ROOT = BASE_DIR / 'static_collected'
 
 LOGIN_URL='/geocoder/accounts/login'
 # LOGIN_REDIRECT_URL='/geocoder/'
+
+#Proxy settings
+
+PROXIES = {
+    'http_proxy': '',
+    'https_proxy': '',
+}
+
+# Mapbender session name 
+
+MB_SESSION_NAME = 'MAPBENDER'

@@ -16,7 +16,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from sdi_geocoder.models import RawCsv, OgcApiFeatures, OgcApiFeaturesCollection, GeoCoding, GeoCodingResult
 from sdi_geocoder.forms import RegistrationForm
 from django.urls import reverse_lazy
-
+from django.conf import settings
 # Create your views here.
 
 def home(request):
@@ -187,7 +187,8 @@ def geocoding_geometries(request, pk):
         geocoding = None
     if geocoding:
         if geocoding.feature_collection:
-            response = JsonResponse(geocoding.feature_collection)
+            response = JsonResponse(geocoding.feature_collection, status=200)
+            response['AccessControlAllowOrigin'] = '*'
             return response
         else:
            return HttpResponse("Geometries not found", status=404) 
@@ -324,7 +325,7 @@ class OgcApiFeaturesCreateView(MyCreateView, PermissionRequiredMixin):
     def form_valid(self, form):
         base_uri = form.cleaned_data["base_uri"]
         param_dict = {'f': 'json'}
-        resp = requests.get(url=base_uri, params=param_dict)
+        resp = requests.get(url=base_uri, params=param_dict, proxies=settings.PROXIES)
         data = resp.json()
         # get collections
         #print("Found " + str(len(data['collections'])) + " collections")
@@ -336,7 +337,7 @@ class OgcApiFeaturesCreateView(MyCreateView, PermissionRequiredMixin):
             # parse collections
             for collection in data['collections']:
                 param_dict = {'f': 'json', 'limit': '1'}
-                resp = requests.get(url=base_uri + '/collections/' + collection['name'] + '/items', params=param_dict)
+                resp = requests.get(url=base_uri + '/collections/' + collection['name'] + '/items', params=param_dict, proxies=settings.PROXIES)
                 example_object = resp.json()
                 #print(str(example_object))
                 # parse example object and extract schema
@@ -389,7 +390,7 @@ class OgcApiFeaturesUpdateView(MyUpdateView, PermissionRequiredMixin):
     def form_valid(self, form):
         base_uri = form.cleaned_data["base_uri"]
         param_dict = {'f': 'json'}
-        resp = requests.get(url=base_uri, params=param_dict)
+        resp = requests.get(url=base_uri, params=param_dict, proxies=settings.PROXIES)
         data = resp.json()
         # get collections
         if len(data['collections']) > 0:
@@ -411,7 +412,7 @@ class OgcApiFeaturesUpdateView(MyUpdateView, PermissionRequiredMixin):
             # parse collections
             for collection in data['collections']:
                 param_dict = {'f': 'json', 'limit': '1'}
-                resp = requests.get(url=base_uri + '/collections/' + collection['name'] + '/items', params=param_dict)
+                resp = requests.get(url=base_uri + '/collections/' + collection['name'] + '/items', params=param_dict, proxies=settings.PROXIES)
                 example_object = resp.json()
                 # test if collection already exists
                 oaf_collection = OgcApiFeaturesCollection.objects.filter(name=collection['name'], 
@@ -543,7 +544,7 @@ class GeoCodingCreateView(MyCreateView, LoginRequiredMixin):
                 column = column + 1
             url = base_uri + "/" + collection + "/items?f=json&" + query_string 
             feature_url = base_uri + "/" + collection + "/items"
-            resp = requests.get(url=feature_url, params=param_dict)
+            resp = requests.get(url=feature_url, params=param_dict, proxies=settings.PROXIES)
             data = resp.json()
             # print("Found " + str(len(data['features'])) + " Objects")
             # get geojson object from service and add other columns to json
@@ -592,6 +593,13 @@ class GeoCodingCreateView(MyCreateView, LoginRequiredMixin):
 class GeoCodingListView(MyListView):
     """Renders the Geocodings"""
     model = GeoCoding
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        #context['id'] = self.kwargs['pk']
+        context['urli'] = self.request.get_host
+        return context
+    
 
     def get_success_url(self):
         return reverse_lazy("geocoding-list")

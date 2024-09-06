@@ -14,6 +14,7 @@
             <th>Letzte Änderung</th>
             <th>Name</th>
             <th>Identifizierte Geometrien</th>
+            <th>Anzeige</th>
             <th>Ergebnisse (HTML)</th>
             <th>Ergebnisse (CSV)</th>
             <!--<th></th>-->
@@ -28,6 +29,8 @@
                 <td>{{ geocoding.changed }}</td>
                 <td>{{ geocoding.title }}</td>
                 <td><a href="{% url 'geocoding-geometries' pk=geocoding.id %}">{{ geocoding.number_of_features }}</a></td>
+                {{ urli }}
+                <td><a target="_blank" href="https://geojson.io/#data=data:application/json,{{request.scheme}}{{ "://"|urlencode }}{{ request.get_host }}{{geocoding.get_absolute_url|urlencode}}">Karte</a></td>
                 <td><a href="{% url 'geocodingresult-list' pk=geocoding.id %}">Liste</a></td>
                 <td><a href="{% url 'geocodingresult-list-csv' pk=geocoding.id %}">Download</a></td>
                 <!--<td><a href="{% url 'geocoding-update' pk=geocoding.id %}">Bearbeiten</a></td>-->

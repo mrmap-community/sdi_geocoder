@@ -3,6 +3,7 @@ from django.urls import reverse, resolve
 import requests
 from django.contrib.auth.models import User, UserManager, AnonymousUser
 from django.contrib.auth import authenticate
+from django.conf import settings
 import uuid
 
 class MapbenderAuthMiddleware:
@@ -20,15 +21,19 @@ class MapbenderAuthMiddleware:
         # check variable mb_user_id from session wrapper
         print(request.COOKIES)
         session_wrapper_url = "http://127.0.0.1/mapbender/php/mod_sessionWrapper.php"
-        if 'MAPBENDER' in request.COOKIES:
+        if settings.MB_SESSION_NAME:
+            mb_session_name = settings.MB_SESSION_NAME
+        else:
+            mb_session_name = 'MAPBENDER'
+        if mb_session_name in request.COOKIES:
             print("Mapbender cookie found")
 
             # try to replicate mapbender user and authenticate them automatically
-            param_dict = {'sessionId': request.COOKIES['MAPBENDER'],
+            param_dict = {'sessionId': request.COOKIES[mb_session_name],
                       'operation': 'get',
                       'key': 'mb_user_id',
                       }
-            resp = requests.get(url=session_wrapper_url, params=param_dict)
+            resp = requests.get(url=session_wrapper_url, params=param_dict, proxies={"http": "", "https": ""})
             data = resp.json()
             if data['success'] == True:
                 if data['result']['value'] == 2:
