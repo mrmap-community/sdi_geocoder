@@ -189,6 +189,7 @@ def geocoding_geometries(request, pk):
         if geocoding.feature_collection:
             response = JsonResponse(geocoding.feature_collection, status=200)
             response['Access-Control-Allow-Origin'] = '*'
+            response['cross-origin-resource-policy'] = 'cross-origin'
             return response
         else:
            return HttpResponse("Geometries not found", status=404) 
