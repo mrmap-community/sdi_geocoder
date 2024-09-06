@@ -179,10 +179,11 @@ def oaf_collection_example_csv(request, pk):
         return redirect('home')
 """
         
-@login_required
+#@login_required
 def geocoding_geometries(request, pk):
     try:
-        geocoding = GeoCoding.objects.get(owned_by_user=request.user, pk=pk)
+        #geocoding = GeoCoding.objects.get(owned_by_user=request.user, pk=pk)
+        geocoding = GeoCoding.objects.get(pk=pk)
     except GeoCoding.DoesNotExist:
         geocoding = None
     if geocoding:
@@ -190,7 +191,7 @@ def geocoding_geometries(request, pk):
             response = JsonResponse(geocoding.feature_collection, status=200)
             response['Access-Control-Allow-Origin'] = '*'
             response['Cross-Origin-Resource-Policy'] = 'cross-origin'
-            response['Content-Disposition'] = 'attachment; filename="geocoded_geometries.geojson"'
+            #response['Content-Disposition'] = 'attachment; filename="geocoded_geometries.geojson"'
             return response
         else:
            return HttpResponse("Geometries not found", status=404) 
