@@ -50,7 +50,7 @@ class MapbenderAuthMiddleware:
                     user_list = User.objects.filter(username="mapbender_user_" + data['result']['value'])
                     if user_list:
                         user = user_list[0]
-                        user.set_password('test')
+                        user.set_password(password)
                         user = authenticate(username="mapbender_user_" + data['result']['value'], password=password)
                         request.user = user
                     else:
