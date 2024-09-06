@@ -141,3 +141,7 @@ PROXIES = {
 # Mapbender session name 
 
 MB_SESSION_NAME = 'MAPBENDER'
+
+# external scheme
+
+EXTERNAL_SCHEME = 'httpddd'

@@ -179,11 +179,11 @@ def oaf_collection_example_csv(request, pk):
         return redirect('home')
 """
         
-#@login_required
+@login_required
 def geocoding_geometries(request, pk):
     try:
-        #geocoding = GeoCoding.objects.get(owned_by_user=request.user, pk=pk)
-        geocoding = GeoCoding.objects.get(pk=pk)
+        geocoding = GeoCoding.objects.get(owned_by_user=request.user, pk=pk)
+        #geocoding = GeoCoding.objects.get(pk=pk)
     except GeoCoding.DoesNotExist:
         geocoding = None
     if geocoding:
@@ -198,7 +198,23 @@ def geocoding_geometries(request, pk):
     else:
         return HttpResponse("Object not found", status=404)
 
-
+def geocoding_public_geometries(request, pk):
+    try:
+        geocoding = GeoCoding.objects.get(pk=pk, public=True)
+        #geocoding = GeoCoding.objects.get(pk=pk)
+    except GeoCoding.DoesNotExist:
+        geocoding = None
+    if geocoding:
+        if geocoding.feature_collection:
+            response = JsonResponse(geocoding.feature_collection, status=200)
+            response['Access-Control-Allow-Origin'] = '*'
+            response['Cross-Origin-Resource-Policy'] = 'cross-origin'
+            #response['Content-Disposition'] = 'attachment; filename="geocoded_geometries.geojson"'
+            return response
+        else:
+           return HttpResponse("Geometries not found", status=404) 
+    else:
+        return HttpResponse("Object not found", status=404)
 
 # My default view classes
 class MyCreateView(LoginRequiredMixin, CreateView):
@@ -600,16 +616,17 @@ class GeoCodingListView(MyListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         #context['id'] = self.kwargs['pk']
-        context['urli'] = self.request.get_host
+        context['url_scheme'] = settings.EXTERNAL_SCHEME
         return context
     
 
     def get_success_url(self):
         return reverse_lazy("geocoding-list")
 
+
 class GeoCodingUpdateView(MyUpdateView):
     model = GeoCoding
-    fields = ["title", "raw_csv", "ogc_api_feature_collection"]
+    fields = ["public"]
       
     def get_success_url(self):
         return reverse_lazy("geocoding-list")

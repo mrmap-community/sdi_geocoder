@@ -82,6 +82,7 @@ class GeoCoding(GenericMetadata):
     raw_csv = models.ForeignKey(RawCsv, on_delete=models.CASCADE, verbose_name="CSV-Datei")
     ogc_api_feature_collection = models.ForeignKey(OgcApiFeaturesCollection, on_delete=models.CASCADE, verbose_name="OGC API Feature Collection")
     feature_collection = models.JSONField(verbose_name="Geometrieobjekte", help_text="", null=True, editable=False)
+    public = models.BooleanField(verbose_name='Öffentlich verfügbar', help_text='', default=False)
 
     def __str__(self):
         """Returns a string representation of the object"""
@@ -89,7 +90,10 @@ class GeoCoding(GenericMetadata):
     
     def get_absolute_url(self):
         return reverse('geocoding-geometries', kwargs={"pk": str(self.id)})
-
+    
+    def get_absolute_public_url(self):
+        return reverse('geocoding-public-geometries', kwargs={"pk": str(self.id)})
+    
     @property
     def number_of_features(self):
         if self.feature_collection:

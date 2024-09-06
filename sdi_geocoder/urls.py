@@ -30,6 +30,7 @@ urlpatterns = [
     path("geocoding/<int:pk>/delete", GeoCodingDeleteView.as_view(template_name="sdi_geocoder/geocoding_confirm_delete.html"), name="geocoding-delete"),
 
     path("geocoding/<int:pk>/geometries/", views.geocoding_geometries, name="geocoding-geometries"),
+    path("geocoding/<int:pk>/public/geometries/", views.geocoding_public_geometries, name="geocoding-public-geometries"),
 
     path("geocoding/<int:pk>/geocodingresult/", GeoCodingResultListView.as_view(template_name="sdi_geocoder/geocoding_result_list.html"), name="geocodingresult-list"),
     path("geocoding/<int:pk>/geocodingresult/csv/", views.geocodingresult_csv, name="geocodingresult-list-csv"),
