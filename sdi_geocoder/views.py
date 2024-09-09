@@ -1,5 +1,4 @@
 import csv, os, base64
-from sdi_geocoder.forms import UploadForm
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib import messages
@@ -100,84 +99,6 @@ def oaf_collection_example_csv(request, pk):
         return response
     else:
         return HttpResponse("No info about collection found", status=404) 
-
-
-"""def geocoder_csv_upload(request):
-    print("form invoked")
-    if request.method == 'GET':
-        print("GET")
-        form = UploadForm()
-        return render(request, 'sdi_geocoder/upload_csv.html', {'form': form})
-
-    form = UploadForm(request.POST, request.FILES)
-
-    # Validate the form
-    if form.is_valid():
-        
-        # Get the correct type string instead of byte without reading full file into memory with a generator to decode line by line
-        geocoder_file = csv.reader(decode_utf8(request.FILES['sent_file']), delimiter='|')
-        csv_array = enumerate(geocoder_file)
-        header_array = next(geocoder_file)
-        #print("header: " + str(header_array))
-        base_uri = "https://www.geoportal.rlp.de/spatial-objects/519/collections"
-        collection = "ave:Flurstueck"
-        #base_uri + "/" + collection + "/items?f=json&" + query_string 
-
-        # Define template for FeatureCollection to return
-        #  
-        
-        result_collection = {
-            'type': 'FeatureCollection',
-            'features': [],
-        }
-        number_of_feature = 0
-        for counter, line in csv_array:
-            param_dict = {}
-            query_string = ""
-            column = 0
-            param_dict['f'] = 'json'
-            for element in line:
-                if header_array[column] == "flurschl":
-                    element = "0" + element
-                query_string = query_string + header_array[column] + "=" + element + "&"
-                param_dict[header_array[column]] = element
-                column = column + 1
-                
-            # print(query_string)
-            url = base_uri + "/" + collection + "/items?f=json&" + query_string 
-            base_uri_2 = base_uri + "/" + collection + "/items"
-            # print(str(param_dict))
-
-            print(str(number_of_feature))
-            print(url)
-            resp = requests.get(url=base_uri_2, params=param_dict)
-            print(resp.status_code)
-            #print(resp.text)
-            data = resp.json()
-            print("Found " + str(len(data['features'])) + " Objects")
-            # get geojson object from service and add other columns to json
-            if len(data['features']) == 1:
-                # append keys from csv, that does not already exists in dataset
-                column = 0
-                for element in line:
-                    if not header_array[column] in data['features'][0]['properties'].keys():
-                        data['features'][0]['properties'][header_array[column]] = element
-                    column = column + 1
-                result_collection['features'].append(data['features'][0])
-            number_of_feature = number_of_feature + 1
-        # print(json.dumps(result_collection))
-        f = open("result.geojson", 'w', encoding='utf-8')
-        json.dump(result_collection, f, ensure_ascii=False, indent=4)
-        f.close()
-
-        #next(geocoder_file)  # Skip header row
-
-        #for counter, line in enumerate(geocoder_file):
-        #    print(str(line[0]))
-        messages.success(request, 'Uploaded successfully!')
-
-        return redirect('home')
-"""
         
 @login_required
 def geocoding_geometries(request, pk):
@@ -556,10 +477,12 @@ class GeoCodingCreateView(MyCreateView, LoginRequiredMixin):
             param_dict['f'] = 'json'
             #print(str(line))
             for element in line:
+                # fix for wrong datamodel 
                 if header_array[column] == "flurschl":
                     element = "0" + element
-                query_string = query_string + header_array[column] + "=" + element + "&"
-                param_dict[header_array[column]] = element
+                if header_array[column] in common_attributes:    
+                    query_string = query_string + header_array[column] + "=" + element + "&"
+                    param_dict[header_array[column]] = element
                 column = column + 1
             url = base_uri + "/" + collection + "/items?f=json&" + query_string 
             feature_url = base_uri + "/" + collection + "/items"

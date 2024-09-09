@@ -35,7 +35,7 @@
                 <td>{% if geocoding.public %}<a target="_blank" href="https://geojson.io/#data=data:text/x-url,{{ url_scheme }}{{ "://" }}{{ request.get_host }}{{geocoding.get_absolute_public_url}}">Karte</a>{% endif %}</td>
                 <td><a href="{% url 'geocodingresult-list' pk=geocoding.id %}">Liste</a></td>
                 <td><a href="{% url 'geocodingresult-list-csv' pk=geocoding.id %}">Download</a></td>
-                <td><a href="{% url 'geocoding-update' pk=geocoding.id %}">Publizieren/De-Pulizieren</a></td>
+                <td><a href="{% url 'geocoding-update' pk=geocoding.id %}">Publizieren/De-Publizieren</a></td>
                 <td><a href="{% url 'geocoding-delete' pk=geocoding.id %}">Löschen</a></td>
             </tr>
         {% endfor %}

@@ -16,8 +16,6 @@ urlpatterns = [
     path("accounts/logout/", auth_views.LogoutView.as_view(next_page="home"), name='logout'),
     # https://dev.to/donesrom/how-to-set-up-django-built-in-registration-in-2023-41hg
     path("register/", views.register, name = "register"),
-
-    # path("csv/upload/", views.geocoder_csv_upload, name="geocoder-csv-upload"),
     
     path("csv/", CsvListView.as_view(), name="csv-list"),
     path("csv/create/", CsvCreateView.as_view(), name="csv-create"),

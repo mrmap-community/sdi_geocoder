@@ -144,4 +144,4 @@ MB_SESSION_NAME = 'MAPBENDER'
 
 # external scheme
 
-EXTERNAL_SCHEME = 'httpddd'
+EXTERNAL_SCHEME = 'http'
