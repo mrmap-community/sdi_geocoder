@@ -267,47 +267,67 @@ class OgcApiFeaturesCreateView(MyCreateView, PermissionRequiredMixin):
         param_dict = {'f': 'json'}
         resp = requests.get(url=base_uri, params=param_dict, proxies=settings.PROXIES)
         data = resp.json()
+        service_title = data['title']
+        # test pygeoapi and ldproxy
+        if 'collections' not in data.keys():
+            print("collections linked as data from landing page")
+            for link_object in data['links']:
+                if link_object['rel'] == 'data':
+                    linkage_to_collections = link_object['href']
+                    resp = requests.get(url=linkage_to_collections, params=param_dict, proxies=settings.PROXIES)
+                    data = resp.json()
+        else:
+            print("collections direct at landig page level")
         # get collections
-        #print("Found " + str(len(data['collections'])) + " collections")
+        print("Found " + str(len(data['collections'])) + " collections")
         if len(data['collections']) > 0:
             # create oaf object
-            oaf = OgcApiFeatures(base_uri=base_uri, title=data['title'], owned_by_user=self.request.user, created=datetime.now())
+            oaf = OgcApiFeatures(base_uri=base_uri, title=service_title, owned_by_user=self.request.user, created=datetime.now())
             oaf.save()
             primary_key = oaf.pk
             # parse collections
             for collection in data['collections']:
                 param_dict = {'f': 'json', 'limit': '1'}
-                resp = requests.get(url=base_uri + '/collections/' + collection['name'] + '/items', params=param_dict, proxies=settings.PROXIES)
-                example_object = resp.json()
-                #print(str(example_object))
-                # parse example object and extract schema
-                # https://stackoverflow.com/questions/76758745/how-to-determine-data-types-of-multiple-dictionary-values-in-a-json-file-when-so
-                #properties = []
-                #for property in example_object['features'][0]['properties']:
-                #    properties.append(property)
-                # test if collection already exists
-                oaf_collection = OgcApiFeaturesCollection.objects.filter(name=collection['name'], 
-                                                          ogc_api_features=OgcApiFeatures.objects.get(pk=primary_key), 
-                                                          owned_by_user=self.request.user,
-                                                          )
-                if oaf_collection:
-                    # update collection
-                    oaf_collection_primary_key = oaf_collection[0].pk
-                    obj = OgcApiFeaturesCollection.objects.get(pk=oaf_collection_primary_key)
-                    setattr(obj, 'title', collection['title'])
-                    setattr(obj, 'geom_type', example_object['features'][0]['geometry']['type'])
-                    setattr(obj, 'changed', datetime.now())
-                    setattr(obj, 'data_example', example_object['features'][0])
-                    obj.save()
+                if 'name' not in collection.keys():
+                    collection_name = collection['id']
                 else:
-                    oaf_collection = OgcApiFeaturesCollection(title=collection['title'],
-                                                              name=collection['name'],
-                                                              geom_type=example_object['features'][0]['geometry']['type'],
-                                                              created=datetime.now(), owned_by_user=self.request.user,
-                                                              ogc_api_features = OgcApiFeatures.objects.get(pk=primary_key),
-                                                              data_example=example_object['features'][0],
-                                                              )
-                    oaf_collection.save()
+                    collection_name = collection['name']
+                resp = requests.get(url=base_uri + '/collections/' + collection_name + '/items', params=param_dict, proxies=settings.PROXIES)
+                example_object = resp.json()
+                if 'features' in example_object.keys():
+                    #print(base_uri + '/collections/' + collection_name + '/items')
+                    #print(str(example_object))
+                    # some collections don't have any items!!!
+                    # parse example object and extract schema
+                    # https://stackoverflow.com/questions/76758745/how-to-determine-data-types-of-multiple-dictionary-values-in-a-json-file-when-so
+                    #properties = []
+                    #for property in example_object['features'][0]['properties']:
+                    #    properties.append(property)
+                    # test if collection already exists
+                    oaf_collection = OgcApiFeaturesCollection.objects.filter(name=collection_name, 
+                                                            ogc_api_features=OgcApiFeatures.objects.get(pk=primary_key), 
+                                                            owned_by_user=self.request.user,
+                                                            )
+                    if oaf_collection:
+                        # update collection
+                        oaf_collection_primary_key = oaf_collection[0].pk
+                        obj = OgcApiFeaturesCollection.objects.get(pk=oaf_collection_primary_key)
+                        setattr(obj, 'title', collection['title'])
+                        setattr(obj, 'geom_type', example_object['features'][0]['geometry']['type'])
+                        setattr(obj, 'changed', datetime.now())
+                        setattr(obj, 'data_example', example_object['features'][0])
+                        obj.save()
+                    else:
+                        oaf_collection = OgcApiFeaturesCollection(title=collection['title'],
+                                                                name=collection_name,
+                                                                geom_type=example_object['features'][0]['geometry']['type'],
+                                                                created=datetime.now(), owned_by_user=self.request.user,
+                                                                ogc_api_features = OgcApiFeatures.objects.get(pk=primary_key),
+                                                                data_example=example_object['features'][0],
+                                                                )
+                        oaf_collection.save()
+                else:
+                    print('Request to item doesnt return features - we cannot use it for geocoding!')
             return HttpResponseRedirect(self.get_success_url())
         else:
             return HttpResponse("JSON from landing page could not be parsed!", status=507) 
@@ -332,6 +352,16 @@ class OgcApiFeaturesUpdateView(MyUpdateView, PermissionRequiredMixin):
         param_dict = {'f': 'json'}
         resp = requests.get(url=base_uri, params=param_dict, proxies=settings.PROXIES)
         data = resp.json()
+        service_title = data['title']
+        if 'collections' not in data.keys():
+            print("collections linked as data from landing page")
+            for link_object in data['links']:
+                if link_object['rel'] == 'data':
+                    linkage_to_collections = link_object['href']
+                    resp = requests.get(url=linkage_to_collections, params=param_dict, proxies=settings.PROXIES)
+                    data = resp.json()
+        else:
+            print("collections direct at landig page level")
         # get collections
         if len(data['collections']) > 0:
             # create oaf object if not already exists! check base_uri
@@ -341,43 +371,50 @@ class OgcApiFeaturesUpdateView(MyUpdateView, PermissionRequiredMixin):
             if oaf:
                 oaf_primary_key = oaf[0].pk
                 obj = oaf[0]
-                setattr(obj, 'title', data['title'])
+                setattr(obj, 'title', service_title)
                 setattr(obj, 'changed', datetime.now())
                 obj.save()
                 primary_key = oaf_primary_key
             else:
-                oaf = OgcApiFeatures(base_uri=base_uri, title=data['title'], owned_by_user=self.request.user, created=datetime.now())
+                oaf = OgcApiFeatures(base_uri=base_uri, title=service_title, owned_by_user=self.request.user, created=datetime.now())
                 oaf.save()
                 primary_key = oaf.pk
             # parse collections
             for collection in data['collections']:
                 param_dict = {'f': 'json', 'limit': '1'}
-                resp = requests.get(url=base_uri + '/collections/' + collection['name'] + '/items', params=param_dict, proxies=settings.PROXIES)
-                example_object = resp.json()
-                # test if collection already exists
-                oaf_collection = OgcApiFeaturesCollection.objects.filter(name=collection['name'], 
-                                                          ogc_api_features=OgcApiFeatures.objects.get(pk=primary_key), 
-                                                          owned_by_user=self.request.user,
-                                                          )
-                if oaf_collection:
-                    # update collection
-                    oaf_collection_primary_key = oaf_collection[0].pk
-                    obj = OgcApiFeaturesCollection.objects.get(pk=oaf_collection_primary_key)
-                    setattr(obj, 'title', collection['title'])
-                    setattr(obj, 'geom_type', example_object['features'][0]['geometry']['type'])
-                    setattr(obj, 'changed', datetime.now())
-                    setattr(obj, 'data_example', example_object['features'][0])
-                    obj.save()
+                if 'name' not in collection.keys():
+                    collection_name = collection['id']
                 else:
-                    oaf_collection = OgcApiFeaturesCollection(title=collection['title'],
-                                                              name=collection['name'],
-                                                              geom_type=example_object['features'][0]['geometry']['type'],
-                                                              created=datetime.now(),
-                                                              owned_by_user=self.request.user,
-                                                              ogc_api_features = OgcApiFeatures.objects.get(pk=primary_key),
-                                                              data_example=example_object['features'][0]
-                                                              )
-                    oaf_collection.save()
+                    collection_name = collection['name']
+                resp = requests.get(url=base_uri + '/collections/' + collection_name + '/items', params=param_dict, proxies=settings.PROXIES)
+                example_object = resp.json()
+                if 'features' in example_object.keys():
+                    # test if collection already exists
+                    oaf_collection = OgcApiFeaturesCollection.objects.filter(name=collection_name, 
+                                                            ogc_api_features=OgcApiFeatures.objects.get(pk=primary_key), 
+                                                            owned_by_user=self.request.user,
+                                                            )
+                    if oaf_collection:
+                        # update collection
+                        oaf_collection_primary_key = oaf_collection[0].pk
+                        obj = OgcApiFeaturesCollection.objects.get(pk=oaf_collection_primary_key)
+                        setattr(obj, 'title', collection['title'])
+                        setattr(obj, 'geom_type', example_object['features'][0]['geometry']['type'])
+                        setattr(obj, 'changed', datetime.now())
+                        setattr(obj, 'data_example', example_object['features'][0])
+                        obj.save()
+                    else:
+                        oaf_collection = OgcApiFeaturesCollection(title=collection['title'],
+                                                                name=collection_name,
+                                                                geom_type=example_object['features'][0]['geometry']['type'],
+                                                                created=datetime.now(),
+                                                                owned_by_user=self.request.user,
+                                                                ogc_api_features = OgcApiFeatures.objects.get(pk=primary_key),
+                                                                data_example=example_object['features'][0]
+                                                                )
+                        oaf_collection.save()
+                else:
+                    print('Request to item doesnt return features - we cannot use it for geocoding!')
             return HttpResponseRedirect(self.get_success_url())
         else:
             return HttpResponse("JSON from landing page could not be parsed!", status=507) 
@@ -478,11 +515,11 @@ class GeoCodingCreateView(MyCreateView, LoginRequiredMixin):
             #print(str(line))
             for element in line:
                 # fix for wrong datamodel 
-                if header_array[column] == "flurschl":
+                if header_array[column] == "flurschl" and len(element) == 8:
                     element = "0" + element
-                if header_array[column] in common_attributes:    
-                    query_string = query_string + header_array[column] + "=" + element + "&"
-                    param_dict[header_array[column]] = element
+                # if header_array[column] in common_attributes:    
+                query_string = query_string + header_array[column] + "=" + element + "&"
+                param_dict[header_array[column]] = element
                 column = column + 1
             url = base_uri + "/" + collection + "/items?f=json&" + query_string 
             feature_url = base_uri + "/" + collection + "/items"
