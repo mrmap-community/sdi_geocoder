@@ -446,10 +446,16 @@ class GeoCodingCreateView(MyCreateView, LoginRequiredMixin):
     # reduce choices for csv to own csv 
     # https://stackoverflow.com/questions/48089590/limiting-choices-in-foreign-key-dropdown-in-django-using-generic-views-createv
     
-    def get_form_kwargs(self):
-        form = super().get_form_kwargs()
-        form['initial'].update({'owned_by_user': self.request.user})
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=None)
+        form.fields['raw_csv'].queryset = form.fields['raw_csv'].queryset.filter(owned_by_user=self.request.user.id)
         return form
+
+    #def get_form_kwargs(self):
+    #    form = super().get_form_kwargs()
+    #    form['initial'].update({'owned_by_user': self.request.user})
+        #form.fields['raw_csv'].queryset = form.fields['raw_csv'].queryset.filter(owned_by_user=self.request.user.id)
+    #    return form
     
     def form_valid(self, form):
         # read csv file from filesystem
