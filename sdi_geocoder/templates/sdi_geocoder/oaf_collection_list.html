@@ -11,7 +11,8 @@
             <th>ID</th>
             <th>Erstellt</th>
             <th>Letzte Änderung</th>
-            <th>Titel</th>
+            <th>Service</th>
+            <th>Sammlung</th>
             <th>Name</th>
             <th>CSV-Beispiel</th>
         </tr>
@@ -22,6 +23,7 @@
                 <td>{{ oaf_collection.id }}</td>
                 <td>{{ oaf_collection.created }}</td>
                 <td>{{ oaf_collection.changed }}</td>
+                <td>{{ oaf_collection.ogc_api_features.title }}</td>
                 <td>{{ oaf_collection.title }}</td>
                 <td><a target="_blank" href="{{ oaf_collection.ogc_api_features.base_uri }}/collections/{{ oaf_collection.name }}">{{ oaf_collection.name }}</a></td>
                 <td><a target="_blank" href="{% url 'oaf-collection-example-csv' pk=oaf_collection.id %}">Export Template</a></td>
